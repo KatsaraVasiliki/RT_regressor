@@ -3,7 +3,7 @@ import os
 import pickle
 import numpy as np
 import pandas as pd
-from utils.cure_descriptors_and_fingerprints import cure
+
 
 
 def get_my_data(common_columns, is_smoke_test):
@@ -54,14 +54,8 @@ def get_my_data(common_columns, is_smoke_test):
             X, y, desc_cols, fgp_cols = pickle.load(f)
     else:
         # Load the original files created with Alvadesk
-        if common_columns == ['unique_id', 'correct_ccs_avg']:
-            raw_descriptors = pd.read_csv("./resources/metlin_descriptors_raw.csv")
-            raw_fingerprints = pd.read_csv("./resources/metlin_fingerprints_raw.csv")
-            # Remove bloat columns and add a number for identification and the correct ccs
-            descriptors, fingerprints = cure(raw_descriptors, raw_fingerprints)
-        elif common_columns == ['pid', 'rt']:
-            descriptors = pd.read_csv("./resources/smrt_descriptors.csv")
-            fingerprints = pd.read_csv("./resources/smrt_fingerprints.csv")
+        descriptors = pd.read_csv("./resources/smrt_descriptors.csv")
+        fingerprints = pd.read_csv("./resources/smrt_fingerprints.csv")
 
         # Create the file that will be used for training
         print('Merging')

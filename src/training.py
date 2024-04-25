@@ -58,7 +58,7 @@ def optimize_and_train_dnn(preprocessed_train_split_X, preprocessed_train_split_
                         preprocessed_train_split_y,
                         best_params)
 
-    return estimator
+    return estimator,best_params
 
 
 
