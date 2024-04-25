@@ -6,7 +6,7 @@ from src import preprocessing, training
 from utils.data_loading import get_my_data
 from src.evaluation import evaluate_model
 from utils.stratification import stratify_y
-from tensorflow import keras
+
 
 # Parameters
 is_smoke_test = True
@@ -62,7 +62,7 @@ if __name__ == "__main__":
             )
 
             print("Param search")
-            trained_dnn,best_params = training.optimize_and_train_dnn(preprocessed_train_split_X, preprocessed_train_split_y,
+            trained_dnn = training.optimize_and_train_dnn(preprocessed_train_split_X, preprocessed_train_split_y,
                                                           param_search_folds, number_of_trials, fold, features)
 
             print("Saving dnn used for this fold")
