@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 
 
-
 def get_my_data(common_columns, is_smoke_test):
     """
     Load or merge Alvadesk files containing descriptors and fingerprints, returning the necessary data for training.

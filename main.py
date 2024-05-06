@@ -7,7 +7,6 @@ from utils.data_loading import get_my_data
 from src.evaluation import evaluate_model
 from utils.stratification import stratify_y
 
-
 # Parameters
 is_smoke_test = True
 is_smrt = True
@@ -19,7 +18,7 @@ if is_smoke_test:
     param_search_folds = 2
 else:
     number_of_folds = 5
-    number_of_trials = 15
+    number_of_trials = 25
     param_search_folds = 5
 
 
@@ -70,5 +69,3 @@ if __name__ == "__main__":
 
             print("Evaluation of the model & saving of the results")
             evaluate_model(trained_dnn, preprocessed_test_split_X, preprocessed_test_split_y, preproc_y, fold, features)
-
-trained_dnn.save("trained_dnn.h5")
