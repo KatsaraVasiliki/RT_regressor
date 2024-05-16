@@ -3,12 +3,12 @@ import os
 from sklearn.model_selection import StratifiedKFold
 
 from src import preprocessing
-from utils.data_loading import get_my_data
-from src.evaluation import evaluate_model_tf
+from src.evaluation_tf import evaluate_model_tf
 from utils.stratification import stratify_y
 from tensorflow import keras
 import optuna
-
+import pandas as pd
+import numpy as np
 
 is_smoke_test = True
 is_smrt = True
@@ -26,14 +26,31 @@ else:
 
 if __name__ == "__main__":
     # Load data
-    print("Loading data")
-    common_columns = ['pid', 'rt'] if is_smrt else ['unique_id', 'correct_ccs_avg']
-    X, y, descriptors_columns, fingerprints_columns = get_my_data(common_columns=common_columns,
-                                                                  is_smoke_test=is_smoke_test)
+    tsv_file = "./resources/fgp_no_SMRT.tsv"
 
-    # Create results directory if it doesn't exist
-    if not os.path.exists('./results'):
-        os.makedirs('./results')
+    # Read the TSV file into a pandas DataFrame
+    df = pd.read_csv(tsv_file, delimiter='\t')
+
+    # Transformation
+    # keep the rows where the first column starts with '0001' (first experiment)
+    filtered_experiment = df[df.iloc[:, 0].str.startswith('0001')]
+    # Drop the inchi.std and id
+    filtered_experiment = filtered_experiment.drop(df.columns[[0, 2]], axis=1)
+    # turn rt from minutes to seconds
+    filtered_experiment.iloc[:, 0] *= 60
+    #get the rt, in a coloumn, MAYBE I NEED TO FLATTEN THE VALUES .values.flatten()
+    y = filtered_experiment.iloc[:, 0]
+    #get the features
+    X = filtered_experiment.iloc[:, 1:]
+    #merge the coloumns into one. Each row is a different feature vector
+    X = X.apply(lambda row: row.values, axis=1)
+    #create the fingerprints_columns
+    fingerprints_columns = np.arange( X.shape[0], dtype='int')
+    #in our case we dont have descriptors so an empty list should probably work
+    descriptors_columns=[]
+    # Necessary preformatting step
+    y = np.array(y).astype('float32').flatten()
+    #X = X.astype('float32')#error!
 
     # Do K number of folds for cross validation and save the splits into a variable called splits
     splitting_function = StratifiedKFold(n_splits=number_of_folds, shuffle=True, random_state=42)
