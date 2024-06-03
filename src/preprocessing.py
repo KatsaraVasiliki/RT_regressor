@@ -2,11 +2,11 @@ from sklearn.preprocessing import QuantileTransformer
 from BlackBox.Preprocessors import FgpPreprocessor, DescriptorsPreprocessor, Preprocessor
 
 
-def preprocess_X(fingerprints_columns, descriptors_columns, train_X, train_y, test_X, test_y, features):
+def preprocess_X(fingerprints_columns, descriptors_columns, train_X, train_y, test_X, test_y, features, is_smrt):
     if features == "fingerprints":
         preproc = FgpPreprocessor(fgp_cols=fingerprints_columns)
     elif features == "descriptors":
-        preproc = DescriptorsPreprocessor(desc_cols=descriptors_columns, adduct_cols=fingerprints_columns[-3:])
+        preproc = DescriptorsPreprocessor(desc_cols=descriptors_columns, adduct_cols=None if is_smrt else fingerprints_columns[-3:])
     else:
         preproc = Preprocessor(desc_cols=descriptors_columns, fgp_cols=fingerprints_columns)
     preproc_train_X = preproc.fit_transform(train_X, train_y)

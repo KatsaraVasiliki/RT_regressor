@@ -4,7 +4,7 @@ from sklearn.model_selection import RepeatedKFold
 import numpy as np
 import optuna
 
-from src.models.dnn_tf import suggest_params, create_dnn, fit_dnn
+from src.models.dnn import suggest_params, create_dnn, fit_dnn
 
 
 def create_objective(X, y, cv):
@@ -30,15 +30,14 @@ def create_objective(X, y, cv):
     return objective
 
 
-def optimize_and_train_dnn(preprocessed_train_split_X, preprocessed_train_split_y, param_search_folds, number_of_trials,
-                           fold, features):
+def optimize_and_train_dnn_NoSMRTNoTfl(preprocessed_train_split_X, preprocessed_train_split_y, param_search_folds, number_of_trials,
+                           fold, features, experiment):
     cv = RepeatedKFold(n_splits=param_search_folds, n_repeats=1, random_state=42)
     n_trials = number_of_trials
     keep_going = False
-
-    study = optuna.create_study(study_name=f"foundation_cross_validation-fold-{fold}-{features}",
+    study = optuna.create_study(study_name=f"foundation_cross_validation_NoSMRTNoTfl-fold-{fold}-{features}-experiment-{experiment}",
                                 direction='minimize',
-                                storage="sqlite:///./results/cv.db",
+                                storage=f"sqlite:///./results_NoSMRTNoTfl/cv_NoSMRTNoTfl.db",
                                 load_if_exists=True,
                                 pruner=optuna.pruners.MedianPruner()
                                 )
@@ -54,7 +53,7 @@ def optimize_and_train_dnn(preprocessed_train_split_X, preprocessed_train_split_
     best_params = study.best_params
     estimator = create_dnn(preprocessed_train_split_X.shape[1], best_params)
     estimator = fit_dnn(estimator,
-                        preprocessed_train_split_X, 
+                        preprocessed_train_split_X,
                         preprocessed_train_split_y,
                         best_params)
 

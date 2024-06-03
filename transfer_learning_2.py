@@ -9,7 +9,9 @@ from tensorflow import keras
 import optuna
 import pandas as pd
 import numpy as np
-from keras.layers import Dense
+from tensorflow.keras.callbacks import EarlyStopping
+import json
+from tensorflow.keras.models import model_from_json
 
 is_smoke_test = True
 is_smrt = False
@@ -32,7 +34,7 @@ if __name__ == "__main__":
 
     # Read the TSV file into a pandas DataFrame
     df = pd.read_csv(tsv_file, delimiter='\t')
-    # get first column, split it to keep the first 4 numbers that indicate the number of experiment
+    # get first column, split it to keep the first 4 numbers that inticate the number of experiment
     first_column = df.iloc[:, 0]
     first_column_modified = first_column.str.split('_').str[0].str[:4]
 
@@ -61,11 +63,11 @@ if __name__ == "__main__":
 
 
 
-    #for experiment in range(1, highest_number + 1):
-    for experiment in range(130, 326+1):
+    # for experiment in range(1, highest_number + 1):
+    for experiment in range(1, 2):
         # if the number of experiment is either a missing values or gives errors continue with the next number
-        # if experiment in missing_numbers or experiment in experimentsWithErrors:
-        #   continue
+        if experiment in missing_numbers or experiment in experimentsWithErrors:
+            continue
         # turn int to str and add the required zeros in the beginning to get 4 digits in total
         print(f"Experiment {experiment}")
         expNumber = str(experiment).zfill(4)
@@ -111,7 +113,6 @@ if __name__ == "__main__":
             test_split_y = y[test_indexes]
 
             features_list = ["fingerprints"]
-
             for features in features_list:
                 # Preprocess X
                 preprocessed_train_split_X, preprocessed_test_split_X, preproc = preprocessing.preprocess_X(
@@ -129,14 +130,33 @@ if __name__ == "__main__":
                     train_y=train_split_y, test_y=test_split_y
                 )
 
-                study = optuna.create_study(study_name=f"foundation_cross_validation-fold-{fold}-{features}",
-                                            direction='minimize',
-                                            storage="sqlite:///./results/cv.db",
-                                            load_if_exists=True,
-                                            pruner=optuna.pruners.MedianPruner()
-                                            )
-                best_params = study.best_params
-                number_of_hidden_layers1 = best_params["number_of_hidden_layers1"]
+
+                number_of_hidden_layers1 = 10
+
+
+
+                # config_path = f"./results/dnn-{fold}-fingerprints/config.json"
+                # weights_path = f"./results/dnn-{fold}-fingerprints/model.weights.h5"
+                # Step 1: Load the JSON configuration from config.json
+                # with open(config_path, 'r') as json_file:
+                #   model_config = json_file.read()
+
+                #Step 2: Reconstruct the model architecture from the JSON configuration
+                # model_new = model_from_json(model_config)
+                # model_new.summary()
+
+                # Step 3: Load the weights from model.weights.h5
+                # model_new.load_weights(weights_path)
+
+                # The model is now loaded and ready for use
+
+
+
+
+
+
+
+
 
                 # load and clone the old trained dnn
                 trained_dnn=keras.models.load_model(f"./results/dnn-{fold}-{features}.keras")
@@ -147,30 +167,35 @@ if __name__ == "__main__":
 
                 model_new=model_clone
 
-
-
+                model_new.summary()
                 #keras.models.Sequential(model_clone.layers[:])  # to get all the layers, not sure about this
 
                 # freeze the weights of the input and deep intermediate layers and train the rest
                 for layer in model_new.layers[:number_of_hidden_layers1+1]:
                     layer.trainable = False
 
-                # compile and fit(training the layers that are not frozen)
-                model_new.compile(optimizer=keras.optimizers.Adam(learning_rate=10 ** (-2)),
-                                        loss=keras.losses.MeanAbsoluteError(),
-                                        metrics=[keras.metrics.MeanSquaredError(),
-                                                 keras.metrics.MeanAbsolutePercentageError()],
-                                        )
+
+
+                stop_here_please = EarlyStopping(patience=5)
+                model_new.compile(
+                    optimizer=keras.optimizers.Adam(learning_rate=10 ** (-2)),
+                    loss=keras.losses.MeanAbsoluteError(),
+                    metrics=[
+                        keras.metrics.MeanSquaredError(),
+                        keras.metrics.MeanAbsolutePercentageError()
+                    ],
+                )
                 model_new.fit(
-                    x=preprocessed_train_split_X,
-                    y=preprocessed_train_split_y,
+                    x=X,
+                    y=y,
                     batch_size=16,
                     epochs=40,
-                    verbose=0
+                    verbose=1,
+                    validation_split=0.1,
+                    callbacks=[stop_here_please]
                 )
-
                 # unfreeze the already frozen layers and train again
-                # no reason for that since we dont have many data
+                # no reason for that since we don't have many data
                 # we have to lower the learning rate!!!!
                 # for layer in model_A.layers[:number_of_hidden_layers1]:
                 #    layer.trainable = True
@@ -192,6 +217,6 @@ if __name__ == "__main__":
 
                 print("Evaluation of the model & saving of the results")
                 evaluate_model_tf(model_new, preprocessed_test_split_X, preprocessed_test_split_y, preproc_y, fold,
-                               features, experiment)
+                               features, experiment, X)
 
 

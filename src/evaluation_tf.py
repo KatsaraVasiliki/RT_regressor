@@ -5,7 +5,7 @@ from sklearn.metrics import median_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
 
 
-def evaluate_model_tf(dnn, preprocessed_train_split_X, preproc_test_split_y, preproc_y, fold, features):
+def evaluate_model_tf(dnn, preprocessed_train_split_X, preproc_test_split_y, preproc_y, fold, features, experiment, X):
     preproc_y_preds = dnn.predict(preprocessed_train_split_X, verbose=0)
     test_split_y = preproc_y.inverse_transform(preproc_test_split_y.reshape(-1, 1)).flatten()
     y_preds = preproc_y.inverse_transform(preproc_y_preds.reshape(-1, 1)).flatten()
@@ -15,18 +15,24 @@ def evaluate_model_tf(dnn, preprocessed_train_split_X, preproc_test_split_y, pre
         'medae': median_absolute_error(test_split_y, y_preds),
         'mape': mean_absolute_percentage_error(test_split_y, y_preds),
         'fold': fold,
-        'features': features
+        'features': features,
+        'experiment_number': experiment,
+        'dataset size´': X.shape[0]
+        # preprocessed_train_split_X.shape[0]+preproc_test_split_y.shape[0]
+
     }
 
     # Convert results dictionary to DataFrame, so it can be easily saved as a csv file
     results_df = pd.DataFrame([evaluation_dictionary])
-
+    # file_path = f"./results_tf/evaluation_results_tf_experiment{experiment}.txt"
+    file_path = f"./results_tf/evaluation_results_tf.txt"
     # Save the DataFrame to CSV
-    if not os.path.exists("./results_tf/evaluation_results.txt"):
+    if not os.path.exists(file_path):
+
         # If the file doesn't exist, set header=True
-        results_df.to_csv("./results_tf/evaluation_results.txt", index=False, header=True)
+        results_df.to_csv(file_path, index=False, header=True)
     else:
         # If the file exists, set header=False
-        results_df.to_csv("./results_tf/evaluation_results.txt", index=False, header=False, mode='a')
+        results_df.to_csv(file_path, index=False, header=False, mode='a')
 
-    print(f"Evaluation results have been saved into ./results_tf/evaluation_results.txt")
+    print(f"Evaluation results have been saved into ./results_tf/evaluation_results_tf.txt")

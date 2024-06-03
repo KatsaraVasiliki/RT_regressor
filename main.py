@@ -47,13 +47,14 @@ if __name__ == "__main__":
         for features in features_list:
             # Preprocess X
             preprocessed_train_split_X, preprocessed_test_split_X, preproc = preprocessing.preprocess_X(
-                 descriptors_columns=descriptors_columns,
-                 fingerprints_columns=fingerprints_columns,
-                 train_X=train_split_X,
-                 train_y=train_split_y,
-                 test_X=test_split_X,
-                 test_y=test_split_y,
-                 features=features
+                descriptors_columns=descriptors_columns,
+                fingerprints_columns=fingerprints_columns,
+                train_X=train_split_X,
+                train_y=train_split_y,
+                test_X=test_split_X,
+                test_y=test_split_y,
+                features=features,
+                is_smrt=is_smrt
             )
 
             preprocessed_train_split_y, preprocessed_test_split_y, preproc_y = preprocessing.preprocess_y(
@@ -68,4 +69,4 @@ if __name__ == "__main__":
             trained_dnn.save(f"./results/dnn-{fold}-{features}.keras")
 
             print("Evaluation of the model & saving of the results")
-            evaluate_model(trained_dnn, preprocessed_test_split_X, preprocessed_test_split_y, preproc_y, fold, features)
+            evaluate_model(trained_dnn, preprocessed_test_split_X, preprocessed_test_split_y, preproc_y, fold, features, )
