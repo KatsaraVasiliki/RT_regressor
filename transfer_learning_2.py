@@ -186,10 +186,11 @@ if __name__ == "__main__":
                     ],
                 )
                 model_new.fit(
-                    x=X,
-                    y=y,
+
+                    x=preprocessed_train_split_X,
+                    y=preprocessed_train_split_y,
                     batch_size=16,
-                    epochs=50,
+                    epochs=30,
                     verbose=1,
                     validation_split=0.1
                 )
