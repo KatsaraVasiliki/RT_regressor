@@ -28,6 +28,13 @@ if __name__ == "__main__":
     common_columns = ['pid', 'rt'] if is_smrt else ['unique_id', 'correct_ccs_avg']
     X, y, descriptors_columns, fingerprints_columns = get_my_data(common_columns=common_columns,
                                                                   is_smoke_test=is_smoke_test)
+    # create a mask to find where rt is greater than 300s
+    mask = y >= 300
+    # filter and keep only the rt>300s
+    y = y[mask]
+    # using the same mask keep only the instances where rt>300s
+    X = X[mask]
+
 
     # Create results directory if it doesn't exist
     if not os.path.exists('./results'):
@@ -69,4 +76,4 @@ if __name__ == "__main__":
             trained_dnn.save(f"./results/dnn-{fold}-{features}.keras")
 
             print("Evaluation of the model & saving of the results")
-            evaluate_model(trained_dnn, preprocessed_test_split_X, preprocessed_test_split_y, preproc_y, fold, features, )
+            evaluate_model(trained_dnn, preprocessed_test_split_X, preprocessed_test_split_y, preproc_y, fold, features)
