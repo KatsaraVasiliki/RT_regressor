@@ -1,4 +1,3 @@
-
 from src.evaluation_NoSMRTNoTfl import evaluate_model_NoSMRTNoTfl
 
 import pandas as pd
@@ -12,7 +11,7 @@ from src import preprocessing, training_NoSMRTNoTfl
 from utils.stratification import stratify_y
 
 
-is_smoke_test = False
+is_smoke_test = True
 is_smrt = False
 
 if is_smoke_test:
@@ -57,7 +56,7 @@ if __name__ == "__main__":
     experimentsWithErrors = [8, 16, 65, 66, 81, 123, 130, 137, 145, 146, 326, 342, 358, 359, 362]
 
     # for experiment in range(1, highest_number + 1):
-    for experiment in range(343, 350):
+    for experiment in range(6, highest_number):
         # if the number of experiment is either a missing values or gives errors continue with the next number
         if experiment in missing_numbers or experiment in experimentsWithErrors:
             continue
@@ -96,8 +95,8 @@ if __name__ == "__main__":
         # Generate the splits dynamically and train with all the splits
 
         # Create results directory for transfer learning if it doesn't exist
-        if not os.path.exists('./results_NoSMRTNoTfl'):
-            os.makedirs('./results_NoSMRTNoTfl')
+        if not os.path.exists(f'./results_NoSMRTNoTfl/experiment{experiment}'):
+            os.makedirs(f'./results_NoSMRTNoTfl/experiment{experiment}')
 
         for fold, (train_indexes, test_indexes) in enumerate(splitting_function.split(X, stratify_y(y))):
             # Use the indexes to actually split the dataset in training and test set.
