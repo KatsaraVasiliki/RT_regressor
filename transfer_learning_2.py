@@ -2,7 +2,7 @@ import os
 
 from sklearn.model_selection import StratifiedKFold
 
-from src import preprocessing
+from src import preprocessing, training_TfL_model
 from src.evaluation_tf import evaluate_model_tf
 from utils.stratification import stratify_y
 from tensorflow import keras
@@ -10,8 +10,8 @@ import optuna
 import pandas as pd
 import numpy as np
 from tensorflow.keras.callbacks import EarlyStopping
-import json
 from tensorflow.keras.models import model_from_json
+
 
 is_smoke_test = True
 is_smrt = False
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
 
     # for experiment in range(1, highest_number + 1):
-    for experiment in range(highest_number-1 , highest_number + 1):
+    for experiment in range(6, highest_number + 1):
         # if the number of experiment is either a missing values or gives errors continue with the next number
         if experiment in missing_numbers or experiment in experimentsWithErrors:
             continue
@@ -102,8 +102,8 @@ if __name__ == "__main__":
         # Generate the splits dynamically and train with all the splits
 
         # Create results directory for transfer learning if it doesn't exist
-        if not os.path.exists('./results_tf'):
-            os.makedirs('./results_tf')
+        if not os.path.exists(f'./results_tf/experiment{experiment}'):
+            os.makedirs(f'./results_tf/experiment{experiment}')
 
         for fold, (train_indexes, test_indexes) in enumerate(splitting_function.split(X, stratify_y(y))):
             # Use the indexes to actually split the dataset in training and test set.
@@ -131,74 +131,87 @@ if __name__ == "__main__":
                 )
 
 
-                number_of_hidden_layers1 = 10
+                number_of_hidden_layers1 = 13
 
 
 
-                config_path = f"./results/dnn-{fold}-fingerprints/config.json"
-                weights_path = f"./results/dnn-{fold}-fingerprints/model.weights.h5"
+                #config_path = f"./results/config.json"
+                #weights_path = f"./results/model.weights.h5"
                 # Step 1: Load the JSON configuration from config.json
-                with open(config_path, 'r') as json_file:
-                  model_config = json_file.read()
+                #with open(config_path, 'r') as json_file:
+                #   model_config = json_file.read()
 
                 #Step 2: Reconstruct the model architecture from the JSON configuration
-                model_new = model_from_json(model_config)
-                model_new.summary()
+                #model_new = model_from_json(model_config)
+                #model_new.summary()
 
                 # Step 3: Load the weights from model.weights.h5
-                model_new.load_weights(weights_path)
+                #model_new.load_weights(weights_path)
 
                 # The model is now loaded and ready for use
 
 
-
-
-
-
-
-
-
                 # load and clone the old trained dnn
-                #trained_dnn=keras.models.load_model(f"./results/dnn-{fold}-{features}.keras")
+                trained_dnn=keras.models.load_model(f"./results/dnn-{fold}-{features}.keras")
                 # trained_dnn = keras.models.load_model('trained_dnn' + str(fold) + '.h5')
-                #model_clone = keras.models.clone_model(trained_dnn)
+                model_clone = keras.models.clone_model(trained_dnn)
                 # copy the weights(since clone_model() does not clone the weights)
-                #model_clone.set_weights(model_clone.get_weights())
+                model_clone.set_weights(model_clone.get_weights())
 
-                #model_new=model_clone
+                model_new=model_clone
 
                 model_new.summary()
                 #keras.models.Sequential(model_clone.layers[:])  # to get all the layers, not sure about this
 
                 # freeze the weights of the input and deep intermediate layers and train the rest
-                for layer in model_new.layers[:10]:
-                    layer.trainable = False
-
-
-
-                stop_here_please = EarlyStopping(patience=5)
-                model_new.compile(
-                    optimizer=keras.optimizers.Adam(learning_rate=10 ** (-3)),
-                    loss=keras.losses.MeanAbsoluteError(),
-                    metrics=[
-                        keras.metrics.MeanSquaredError(),
-                        keras.metrics.MeanAbsolutePercentageError()
-                    ],
-                )
-                model_new.fit(
-
-                    x=preprocessed_train_split_X,
-                    y=preprocessed_train_split_y,
-                    batch_size=16,
-                    epochs=30,
-                    verbose=1,
-                    validation_split=0.1
-                )
+                # for layer in model_new.layers[:14]:
+                #     layer.trainable = False
+                # model_new.summary()
+                print('TRAINING WITH FROZEN LAYERS')
+                T=0
+                trained_NoSMRTNoTfl = training_TfL_model.optimize_and_train_dnn_TfL(preprocessed_train_split_X,
+                                                                                    preprocessed_train_split_y,
+                                                                                    param_search_folds,
+                                                                                    number_of_trials,
+                                                                                    fold, features, experiment,
+                                                                                    model_new, T)
+                print("Evaluation of the model & saving of the results")
+                evaluate_model_tf(trained_NoSMRTNoTfl, preprocessed_test_split_X, preprocessed_test_split_y, preproc_y, fold,
+                                  features, experiment, X)
+                trained_NoSMRTNoTfl.summary()
+                # #stop_here_please = EarlyStopping(patience=5)
+                # model_new.compile(
+                #     optimizer=keras.optimizers.Adam(learning_rate=10 ** (-3)),
+                #     loss=keras.losses.MeanAbsoluteError(),
+                #     metrics=[
+                #         keras.metrics.MeanSquaredError(),
+                #         keras.metrics.MeanAbsolutePercentageError()
+                #     ],
+                # )
+                # model_new.fit(
+                #
+                #     x=preprocessed_train_split_X,
+                #     y=preprocessed_train_split_y,
+                #     batch_size=16,
+                #     epochs=30,
+                #     verbose=1,
+                #     validation_split=0.1
+                # )
                 # unfreeze the already frozen layers and train again
                 # no reason for that since we don't have many data
                 # we have to lower the learning rate!!!!
-                # for layer in model_A.layers[:number_of_hidden_layers1]:
+                # for layer in trained_NoSMRTNoTfl.layers[:14]:
                 #    layer.trainable = True
+                # trained_NoSMRTNoTfl.summary()
+                T=1
+                print('TRAINING AFTER UNFREEZING')
+                trained_NoSMRTNoTfl2 = training_TfL_model.optimize_and_train_dnn_TfL(preprocessed_train_split_X,
+                                                                                    preprocessed_train_split_y,
+                                                                                    param_search_folds,
+                                                                                    number_of_trials,
+                                                                                    fold, features, experiment,
+                                                                                    trained_NoSMRTNoTfl,T)
+
                 # compile and fit
                 # model_A.compile(optimizer=keras.optimizers.Adam(learning_rate=10 ** (-5)),
                 #               loss=keras.losses.MeanAbsoluteError(),
@@ -211,12 +224,12 @@ if __name__ == "__main__":
                 #   batch_size=16,
                 #   epochs=30,
                 #   verbose=0)
-
+                trained_NoSMRTNoTfl2.summary()
                 print("Saving dnn used for this fold")
-                model_new.save(f"./results_tf/experiment{experiment}/dnn-{fold}-{features}.keras")
+                trained_NoSMRTNoTfl2.save(f"./results_tf/experiment{experiment}/dnn-{fold}-{features}.keras")
 
                 print("Evaluation of the model & saving of the results")
-                evaluate_model_tf(model_new, preprocessed_test_split_X, preprocessed_test_split_y, preproc_y, fold,
+                evaluate_model_tf(trained_NoSMRTNoTfl2, preprocessed_test_split_X, preprocessed_test_split_y, preproc_y, fold,
                                features, experiment, X)
 
 
