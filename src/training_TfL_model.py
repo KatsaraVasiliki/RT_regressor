@@ -8,9 +8,8 @@ def create_objective_Tfl(X, y, cv, model_new, T):
     def objective_Tfl(trial):
         params = suggest_params_Tfl(trial, T)
         estimator = model_new
-        for layer in estimator.layers[:13 + 4]:
-            layer.trainable = False
-        #estimator = create_dnn(X.shape[1], params)
+        #for layer in estimator.layers[:14]:
+         #   layer.trainable = False
         cross_val_scores = []
         for step, (train_index, test_index) in enumerate(cv.split(X, y)):
             X_train, X_test = X[train_index], X[test_index]
@@ -52,23 +51,27 @@ def optimize_and_train_dnn_TfL(preprocessed_train_split_X, preprocessed_train_sp
         study.optimize(objective, n_trials=n_trials)
 
     best_params = study.best_params
-    estimator=model_new
-    if T==0:
-        for layer in estimator.layers[:14]:
-            layer.trainable = False
+    estimator = model_new
+    #if T==0:
+     #   for layer in estimator.layers[:14]:
+      #      layer.trainable = False
 
-        estimator = fit_dnn_Tfl(estimator,
+    #    estimator = fit_dnn_Tfl(estimator,
+    #                       preprocessed_train_split_X,
+    #                        preprocessed_train_split_y,
+    #                        best_params)
+    #else:
+    #  for layer in estimator.layers[:14]:
+    #      layer.trainable = True
+
+    #  estimator = fit_dnn_Tfl(estimator,
+    #                           preprocessed_train_split_X,
+    #                           preprocessed_train_split_y,
+    #                           best_params)
+    estimator = fit_dnn_Tfl(estimator,
                             preprocessed_train_split_X,
                             preprocessed_train_split_y,
                             best_params)
-    else:
-        for layer in estimator.layers[:14]:
-            layer.trainable = True
-
-        estimator = fit_dnn_Tfl(estimator,
-                                preprocessed_train_split_X,
-                                preprocessed_train_split_y,
-                                best_params)
 
     return estimator
 

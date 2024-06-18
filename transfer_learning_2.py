@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
 
     # for experiment in range(1, highest_number + 1):
-    for experiment in range(6, highest_number + 1):
+    for experiment in range(96, highest_number + 1):
         # if the number of experiment is either a missing values or gives errors continue with the next number
         if experiment in missing_numbers or experiment in experimentsWithErrors:
             continue
@@ -133,40 +133,39 @@ if __name__ == "__main__":
 
                 number_of_hidden_layers1 = 13
 
+                config_path = f"./results/dnn-3-fingerprints/config.json"
+                weights_path = f"./results/dnn-3-fingerprints/model.weights.h5"
 
-
-                #config_path = f"./results/config.json"
-                #weights_path = f"./results/model.weights.h5"
                 # Step 1: Load the JSON configuration from config.json
-                #with open(config_path, 'r') as json_file:
-                #   model_config = json_file.read()
+                with open(config_path, 'r') as json_file:
+                   model_config = json_file.read()
 
                 #Step 2: Reconstruct the model architecture from the JSON configuration
-                #model_new = model_from_json(model_config)
-                #model_new.summary()
+                model_new = model_from_json(model_config)
+
 
                 # Step 3: Load the weights from model.weights.h5
-                #model_new.load_weights(weights_path)
+                model_new.load_weights(weights_path)
 
                 # The model is now loaded and ready for use
 
 
                 # load and clone the old trained dnn
-                trained_dnn=keras.models.load_model(f"./results/dnn-{fold}-{features}.keras")
+                #trained_dnn=keras.models.load_model(f"./results/dnn-{fold}-{features}.keras")
                 # trained_dnn = keras.models.load_model('trained_dnn' + str(fold) + '.h5')
-                model_clone = keras.models.clone_model(trained_dnn)
+                #model_clone = keras.models.clone_model(trained_dnn)
                 # copy the weights(since clone_model() does not clone the weights)
-                model_clone.set_weights(model_clone.get_weights())
+                #model_clone.set_weights(model_clone.get_weights())
 
-                model_new=model_clone
+                #model_new=model_clone
 
-                model_new.summary()
+                # model_new.summary()
                 #keras.models.Sequential(model_clone.layers[:])  # to get all the layers, not sure about this
 
                 # freeze the weights of the input and deep intermediate layers and train the rest
-                # for layer in model_new.layers[:14]:
-                #     layer.trainable = False
-                # model_new.summary()
+                for layer in model_new.layers[:number_of_hidden_layers1+1]:
+                    layer.trainable = False
+                model_new.summary()
                 print('TRAINING WITH FROZEN LAYERS')
                 T=0
                 trained_NoSMRTNoTfl = training_TfL_model.optimize_and_train_dnn_TfL(preprocessed_train_split_X,
@@ -178,7 +177,7 @@ if __name__ == "__main__":
                 print("Evaluation of the model & saving of the results")
                 evaluate_model_tf(trained_NoSMRTNoTfl, preprocessed_test_split_X, preprocessed_test_split_y, preproc_y, fold,
                                   features, experiment, X)
-                trained_NoSMRTNoTfl.summary()
+                # trained_NoSMRTNoTfl.summary()
                 # #stop_here_please = EarlyStopping(patience=5)
                 # model_new.compile(
                 #     optimizer=keras.optimizers.Adam(learning_rate=10 ** (-3)),
@@ -200,9 +199,9 @@ if __name__ == "__main__":
                 # unfreeze the already frozen layers and train again
                 # no reason for that since we don't have many data
                 # we have to lower the learning rate!!!!
-                # for layer in trained_NoSMRTNoTfl.layers[:14]:
-                #    layer.trainable = True
-                # trained_NoSMRTNoTfl.summary()
+                for layer in trained_NoSMRTNoTfl.layers[:14]:
+                    layer.trainable = True
+                #  trained_NoSMRTNoTfl.summary()
                 T=1
                 print('TRAINING AFTER UNFREEZING')
                 trained_NoSMRTNoTfl2 = training_TfL_model.optimize_and_train_dnn_TfL(preprocessed_train_split_X,
@@ -224,7 +223,7 @@ if __name__ == "__main__":
                 #   batch_size=16,
                 #   epochs=30,
                 #   verbose=0)
-                trained_NoSMRTNoTfl2.summary()
+                # trained_NoSMRTNoTfl2.summary()
                 print("Saving dnn used for this fold")
                 trained_NoSMRTNoTfl2.save(f"./results_tf/experiment{experiment}/dnn-{fold}-{features}.keras")
 
