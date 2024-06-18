@@ -1,6 +1,6 @@
 import os
 
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import KFold
 
 from src import preprocessing, training_TfL_model
 from src.evaluation_tf import evaluate_model_tf
@@ -18,7 +18,7 @@ is_smrt = False
 
 if is_smoke_test:
     print("Running smoke test...")
-    number_of_folds = 2
+    number_of_folds = 5
     number_of_trials = 2
     param_search_folds = 2
 else:
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
 
     # for experiment in range(1, highest_number + 1):
-    for experiment in range(96, highest_number + 1):
+    for experiment in range(1, highest_number + 1):
         # if the number of experiment is either a missing values or gives errors continue with the next number
         if experiment in missing_numbers or experiment in experimentsWithErrors:
             continue
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         X = X.astype('float32')
 
         # Do K number of folds for cross validation and save the splits into a variable called splits
-        splitting_function = StratifiedKFold(n_splits=number_of_folds, shuffle=True, random_state=42)
+        splitting_function = KFold(n_splits=number_of_folds, shuffle=True, random_state=42)
         # Generate the splits dynamically and train with all the splits
 
         # Create results directory for transfer learning if it doesn't exist
@@ -165,7 +165,7 @@ if __name__ == "__main__":
                 # freeze the weights of the input and deep intermediate layers and train the rest
                 for layer in model_new.layers[:number_of_hidden_layers1+1]:
                     layer.trainable = False
-                model_new.summary()
+                # model_new.summary()
                 print('TRAINING WITH FROZEN LAYERS')
                 T=0
                 trained_NoSMRTNoTfl = training_TfL_model.optimize_and_train_dnn_TfL(preprocessed_train_split_X,
@@ -224,8 +224,8 @@ if __name__ == "__main__":
                 #   epochs=30,
                 #   verbose=0)
                 # trained_NoSMRTNoTfl2.summary()
-                print("Saving dnn used for this fold")
-                trained_NoSMRTNoTfl2.save(f"./results_tf/experiment{experiment}/dnn-{fold}-{features}.keras")
+                # print("Saving dnn used for this fold")
+                # trained_NoSMRTNoTfl2.save(f"./results_tf/experiment{experiment}/dnn-{fold}-{features}.keras")
 
                 print("Evaluation of the model & saving of the results")
                 evaluate_model_tf(trained_NoSMRTNoTfl2, preprocessed_test_split_X, preprocessed_test_split_y, preproc_y, fold,
