@@ -102,8 +102,8 @@ if __name__ == "__main__":
         # Generate the splits dynamically and train with all the splits
 
         # Create results directory for transfer learning if it doesn't exist
-        if not os.path.exists(f'./results_tf/experiment{experiment}'):
-            os.makedirs(f'./results_tf/experiment{experiment}')
+        if not os.path.exists(f'./results_tf'):
+            os.makedirs(f'./results_tf')
 
         for fold, (train_indexes, test_indexes) in enumerate(splitting_function.split(X, stratify_y(y))):
             # Use the indexes to actually split the dataset in training and test set.
