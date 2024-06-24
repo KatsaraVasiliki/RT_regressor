@@ -1,37 +1,36 @@
+
 from optuna.trial import TrialState
-from sklearn.model_selection import RepeatedKFold
+from sklearn.model_selection import train_test_split
 import tensorflow.keras as keras
 import numpy as np
 import optuna
 
-def create_objective_Tfl(X, y, cv, model_new, T):
+def create_objective_Tfl(X_train, X_test, y_train, y_test, model_new, T):
     def objective_Tfl(trial):
         params = suggest_params_Tfl(trial, T)
         estimator = model_new
-        #for layer in estimator.layers[:14]:
-         #   layer.trainable = False
         cross_val_scores = []
-        for step, (train_index, test_index) in enumerate(cv.split(X, y)):
-            X_train, X_test = X[train_index], X[test_index]
-            y_train, y_test = y[train_index], y[test_index]
-            estimator = fit_dnn_Tfl(estimator, X_train, y_train, params)
-            test_metrics = estimator.evaluate(
-                X_test, y_test, return_dict=True, verbose=0
-            )
-            # loss is MAE Score, use it as optuna metric
-            score = test_metrics["loss"]
-            cross_val_scores.append(score)
-            intermediate_value = np.mean(cross_val_scores)
-            trial.report(intermediate_value, step)
-            if trial.should_prune():
-                raise optuna.TrialPruned()
+        estimator = fit_dnn_Tfl(estimator, X_train, y_train, params)
+        test_metrics = estimator.evaluate(
+            X_test, y_test, return_dict=True, verbose=0
+        )
+        # loss is MAE Score, use it as optuna metric
+        score = test_metrics["loss"]
+        cross_val_scores.append(score)
+        intermediate_value = np.mean(cross_val_scores)
+        trial.report(intermediate_value, 0)
+        if trial.should_prune():
+            raise optuna.TrialPruned()
         return np.mean(cross_val_scores)
     return objective_Tfl
 
 
-def optimize_and_train_dnn_TfL(preprocessed_train_split_X, preprocessed_train_split_y, param_search_folds, number_of_trials,
-                           fold, features, experiment, model_new, T):
-    cv = RepeatedKFold(n_splits=param_search_folds, n_repeats=1, random_state=42)
+def optimize_and_train_dnn_TfL(preprocessed_train_split_X, preprocessed_train_split_y, number_of_trials, fold,
+                               features, experiment, model_new, T):
+    train_split_X, test_split_X, train_split_y, test_split_y = train_test_split(preprocessed_train_split_X,
+                                                                                preprocessed_train_split_y,
+                                                                                test_size=0.2,
+                                                                                random_state=42)
     n_trials = number_of_trials
     keep_going = False
 
@@ -42,7 +41,7 @@ def optimize_and_train_dnn_TfL(preprocessed_train_split_X, preprocessed_train_sp
                                 pruner=optuna.pruners.MedianPruner()
                                 )
 
-    objective = create_objective_Tfl(preprocessed_train_split_X, preprocessed_train_split_y, cv, model_new,T)
+    objective = create_objective_Tfl( train_split_X, test_split_X, train_split_y, test_split_y, model_new,T)
     trials = [trial for trial in study.get_trials() if trial.state in [TrialState.COMPLETE, TrialState.PRUNED]]
     if not keep_going:
         n_trials = n_trials - len(trials)
@@ -52,22 +51,6 @@ def optimize_and_train_dnn_TfL(preprocessed_train_split_X, preprocessed_train_sp
 
     best_params = study.best_params
     estimator = model_new
-    #if T==0:
-     #   for layer in estimator.layers[:14]:
-      #      layer.trainable = False
-
-    #    estimator = fit_dnn_Tfl(estimator,
-    #                       preprocessed_train_split_X,
-    #                        preprocessed_train_split_y,
-    #                        best_params)
-    #else:
-    #  for layer in estimator.layers[:14]:
-    #      layer.trainable = True
-
-    #  estimator = fit_dnn_Tfl(estimator,
-    #                           preprocessed_train_split_X,
-    #                           preprocessed_train_split_y,
-    #                           best_params)
     estimator = fit_dnn_Tfl(estimator,
                             preprocessed_train_split_X,
                             preprocessed_train_split_y,
