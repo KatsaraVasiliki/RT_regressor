@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
 
     # for experiment in range(1, highest_number + 1):
-    for experiment in range(315, highest_number + 1):
+    for experiment in range(332, highest_number + 1):
         # if the number of experiment is either a missing values or gives errors continue with the next number
         if experiment in missing_numbers or experiment in experimentsWithErrors:
             continue
