@@ -1,10 +1,5 @@
 import os
-
-from sklearn.model_selection import StratifiedKFold
-
-from src import preprocessing, training
 from utils.data_loading import get_my_data
-from src.evaluation import evaluate_model
 from utils.stratification import stratify_y
 from tensorflow.keras.models import model_from_json
 from BlackBox.Preprocessors import FgpPreprocessor
@@ -12,6 +7,8 @@ from sklearn.preprocessing import QuantileTransformer
 import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.stats import pearsonr
+import scipy.stats as stats
+import seaborn as sns
 
 # Parameters
 is_smoke_test = False
@@ -31,15 +28,14 @@ if __name__ == "__main__":
     # using the same mask keep only the instances where rt>300s
     X = X[mask]
 
-    print(y)
+
     # Create results directory if it doesn't exist
     if not os.path.exists('./results'):
         os.makedirs('./results')
 
     # Do K number of folds for cross validation and save the splits into a variable called splits
 
-    stratify_y(y)
-    print(y)
+
     preproc = FgpPreprocessor(fgp_cols=fingerprints_columns)
     preproc_y = QuantileTransformer(n_quantiles=1000, output_distribution='normal')
 
@@ -69,22 +65,28 @@ if __name__ == "__main__":
         'predicted': y_preds,
         'true': y})
 
-    print(df)
-
-    correlation_matrix = df.corr()
+    # correlation_matrix = df.corr()
 
     # Extract correlation coefficient between 'predicted' and 'true' columns
-    correlation_coefficient_pd = correlation_matrix.loc['predicted', 'true']
+    # correlation_coefficient_pd = correlation_matrix.loc['predicted', 'true']
+   # print(f"Pearson correlation coefficient: {correlation_coefficient_pd}")
 
-    print(f"Pearson correlation coefficient: {correlation_coefficient_pd}")
+    # Calculate the correlation coefficient
+    correlation_coef, _ = stats.pearsonr(y, y_preds)
 
-    correlation_coefficient_sp, p_value = pearsonr(y_preds, y)
-
-    print(f"Pearson correlation coefficient: {correlation_coefficient_sp}")
-    print(f"P-value: {p_value}")
-
+    # Create a scatter plot with the correlation coefficient in the title
+    plt.figure(figsize=(10, 6))
     plt.scatter(y, y_preds, alpha=0.3)
-    plt.xlabel('Actual Values')
-    plt.ylabel('Predicted Values')
-    plt.title('Scatter Plot of Actual vs Predicted RT of SMRT dataset')
+    sns.regplot(x=y, y=y_preds, scatter=False, color='red', line_kws={'linewidth': 2})
+    plt.xlabel('Actual Values', fontsize=14)
+    plt.ylabel('Predicted Values', fontsize=14)
+    plt.title(f'Scatter Plot of Actual vs Predicted Values\nCorrelation Coefficient: {correlation_coef:.2f}', fontsize=16)
+    plt.grid(True)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.legend(['Scatter Plot: Shows the relationship between actual and predicted values.'
+                   ,'Regression Line: Indicates the best fit line through the data points, giving a sense of the trend.'
+                   ],
+                  loc='best', fontsize=12, prop={'size': 12})
+    #plt.legend(["Scatter plot", "Regression line"], loc="lower right")
     plt.show()

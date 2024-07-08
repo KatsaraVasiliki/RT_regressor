@@ -20,7 +20,7 @@ if is_smoke_test:
     print("Running smoke test...")
     number_of_folds = 5
     number_of_trials = 2
-    param_search_folds = 2
+    param_search_folds = 1
 else:
     number_of_folds = 5
     number_of_trials = 15
@@ -44,9 +44,6 @@ if __name__ == "__main__":
     # Find the highest number
     highest_number = first_column_int.max()
 
-
-
-
     # DELETE DUPLICATES
     # delete the duplicates and turn the variable to a list
     first_column_noDupl = list(set(first_column_int))
@@ -59,12 +56,12 @@ if __name__ == "__main__":
             for j in range(first_column_noDupl[i - 1] + 1, first_column_noDupl[i]):
                 missing_numbers.append(j)
 
-    experimentsWithErrors=[8,13,16,65,66,81, 123, 130,137, 145, 146, 326, 342, 358, 359,362]
+    experimentsWithErrors=[8,13,16,65,66,81, 123, 130,137, 145, 146, 229, 233, 326, 342, 358, 359,362]
 
 
 
     # for experiment in range(1, highest_number + 1):
-    for experiment in range(129, highest_number + 1):
+    for experiment in range(332, highest_number + 1):
         # if the number of experiment is either a missing values or gives errors continue with the next number
         if experiment in missing_numbers or experiment in experimentsWithErrors:
             continue
