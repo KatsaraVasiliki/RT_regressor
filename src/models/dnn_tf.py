@@ -39,7 +39,7 @@ def suggest_params(trial):
         'lr': trial.suggest_float('lr', 5*10 ** (-6), 10 ** (-4), log=True),
         'batch_size': trial.suggest_categorical('batch_size', [16]),
 
-        'number_of_hidden_layers1': trial.suggest_categorical('number_of_hidden_layers1', [2, 4, 6, 8]),
+        'number_of_hidden_layers1': trial.suggest_categorical('number_of_hidden_layers1', [2, 4, 6, 8,10]),
         'dropout_between_layers1': trial.suggest_float('dropout_between_layers1', 0, 0.5),
         'neurons_per_layer1': trial.suggest_categorical('neurons_per_layer1', [2048, 4096]),
         'epochs': trial.suggest_int('epochs', 10, 100),
