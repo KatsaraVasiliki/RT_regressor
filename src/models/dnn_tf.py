@@ -37,16 +37,16 @@ def create_dnn(n_features, optuna_params):
 def suggest_params(trial):
     params = {
         'lr': trial.suggest_float('lr', 5*10 ** (-6), 10 ** (-4), log=True),
-        'batch_size': trial.suggest_categorical('batch_size', [16]),
+        'batch_size': trial.suggest_categorical('batch_size', [8, 16, 32, 64]),
 
-        'number_of_hidden_layers1': trial.suggest_categorical('number_of_hidden_layers1', [2, 4, 6, 8,10]),
+        'number_of_hidden_layers1': trial.suggest_categorical('number_of_hidden_layers1', [2, 4, 6, 8, 10]),
         'dropout_between_layers1': trial.suggest_float('dropout_between_layers1', 0, 0.5),
         'neurons_per_layer1': trial.suggest_categorical('neurons_per_layer1', [2048, 4096]),
         'epochs': trial.suggest_int('epochs', 10, 100),
         'activation1': trial.suggest_categorical('activation1', ['relu']),
 
 
-        'number_of_hidden_layers2': trial.suggest_categorical('number_of_hidden_layers2', [3, 4, 6, 8]),
+        'number_of_hidden_layers2': trial.suggest_categorical('number_of_hidden_layers2', [3, 4, 6, 8, 10]),
         'dropout_between_layers2': trial.suggest_float('dropout_between_layers2', 0, 0.1),
         'neurons_per_layer2': trial.suggest_categorical('neurons_per_layer2', [40, 60, 80])
 
