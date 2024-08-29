@@ -20,7 +20,7 @@ def evaluate_model(dnn, preprocessed_train_split_X, preproc_test_split_y, prepro
 
     # Convert results dictionary to DataFrame, so it can be easily saved as a csv file
     results_df = pd.DataFrame([evaluation_dictionary])
-    file_path = f"./results_tf/evaluation_results_tf.txt"
+    file_path = f"./results/evaluation_results.txt"
     # Save the DataFrame to CSV
     if not os.path.exists(file_path):
         # If the file doesn't exist, set header=True
@@ -29,4 +29,4 @@ def evaluate_model(dnn, preprocessed_train_split_X, preproc_test_split_y, prepro
         # If the file exists, set header=False
         results_df.to_csv(file_path, index=False, header=False, mode='a')
 
-    print(f"Evaluation results have been saved into ./results/evaluation_results_tf.txt")
+    print(f"Evaluation results have been saved into ./results/evaluation_results.txt")
