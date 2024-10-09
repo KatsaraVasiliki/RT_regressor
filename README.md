@@ -1,8 +1,8 @@
 # CMM-RT
 This code implements methods for the accurate prediction of Retention Times 
-(RTs) for a given Chromatographic Method (CM) using machine learning, as 
-described in:
+(RTs) for a given Chromatographic Method (CM) using Transfer learning
 
+The model trained with the SMRT dataset is inspired by
 > García, C.A., Gil-de-la-Fuente, A., Barbas, C. et al. Probabilistic metabolite annotation using retention time prediction and meta-learned projections. J Cheminform 14, 33 (2022). https://doi.org/10.1186/s13321-022-00613-8. 
 
 
