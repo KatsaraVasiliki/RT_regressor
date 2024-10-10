@@ -52,7 +52,7 @@ if __name__ == "__main__":
         test_split_X = X[test_indexes]
         test_split_y = y[test_indexes]
 
-        features_list = ["descriptors", "all"]#"fingerprints"] if is_smoke_test else ["fingerprints", "descriptors", "all"]
+        features_list = ["fingerprints"] if is_smoke_test else ["fingerprints", "descriptors", "all"]
         for features in features_list:
             # Preprocess X
             preprocessed_train_split_X, preprocessed_test_split_X, preproc = preprocessing.preprocess_X(
@@ -79,7 +79,6 @@ if __name__ == "__main__":
             else:
                 trained_dnn = training.optimize_and_train_dnn(preprocessed_train_split_X, preprocessed_train_split_y,
                                                           param_search_folds, number_of_trials, fold, features)
-            #trained_dnn = training_without_Optuna(preprocessed_train_split_X, preprocessed_train_split_y, dnn_topology)
 
 
             print("Saving dnn used for this fold")
