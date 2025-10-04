@@ -17,7 +17,7 @@ And under the supervision of:
 
 - **Abraham Otero Quintana**  
 - **Guillermo Ramajo Fernández**  
-- **Minos Matsoukas** 
+- **Minos-Timotheos Matsoukas** 
 
 
 ---
