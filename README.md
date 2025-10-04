@@ -5,6 +5,13 @@ This repository contains the code and resources developed for the thesis:
 
 The goal of this work is to **predict retention times (RTs) in chromatography** using **deep neural networks (DNNs)**, with a focus on **transfer learning** to adapt models trained on synthetic compounds to natural products.  
 
+## Research Affiliation  
+
+This research was conducted within the **Biomedical Engineering Departments** of:  
+
+- **Universidad San Pablo CEU (Madrid, Spain)**  
+- **University of West Attica (Athens, Greece)**
+
 
 ---
 ##  Challenges and Problem Statement  
