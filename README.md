@@ -13,6 +13,13 @@ This research was conducted within the **Biomedical Engineering Departments** of
 - **University of West Attica (Athens, Greece)**
 
 
+And under the supervision of:  
+
+- **Abraham Otero Quintana**  
+- **Guillermo Ramajo Fernández**  
+- **Minos Matsoukas** 
+
+
 ---
 ##  Challenges and Problem Statement  
 
