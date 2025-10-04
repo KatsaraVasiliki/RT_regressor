@@ -5,6 +5,29 @@ This repository contains the code and resources developed for the thesis:
 
 The goal of this work is to **predict retention times (RTs) in chromatography** using **deep neural networks (DNNs)**, with a focus on **transfer learning** to adapt models trained on synthetic compounds to natural products.  
 
+
+---
+##  Challenges and Problem Statement  
+
+Deep neural networks (DNNs) generally require **large, labeled datasets** to achieve high performance.  
+In chromatography, this poses a challenge:  
+
+- **SMRT dataset**: Large (~80,000 compounds) but mostly **synthetic compounds**, which have different chemical properties than natural products.  
+- **Natural product RT datasets**: Much **smaller** (dozens to hundreds of compounds), making them less suitable for training DNNs directly.  
+
+As a result, models trained on SMRT often fail to generalize well to natural products, while models trained directly on natural product datasets suffer from **data scarcity** and limited predictive power.  
+
+**Transfer learning** provides a solution:  
+- First, train a model on the large SMRT dataset to capture general molecular features influencing RT.  
+- Then, fine-tune this pre-trained model on smaller natural product datasets (RepoRT), enabling better predictions despite limited data.  
+
+### Project Goal  
+This project aims to:  
+1. Address the limitations of SMRT (synthetic bias) and small natural product datasets.  
+2. Use **transfer learning** to improve retention time prediction for natural compounds.  
+3. Compare transfer learning with direct training approaches, evaluating their performance across multiple error metrics.  
+
+
 ---
 
 ## Research Summary  
